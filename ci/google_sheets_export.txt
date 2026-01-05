@@ -44,7 +44,7 @@ function exportSheetToGitHub() {
   const payload = {
     message: `Update ${FILE_PATH} from Google Sheets via Apps Script`,
     content: contentEncoded,
-    branch: 'main' // Або 'master', залежно від вашої гілки
+    branch: 'master' // Або 'master', залежно від вашої гілки
   };
 
   if (fileSha) {
