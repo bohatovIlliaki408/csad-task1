@@ -1,54 +1,41 @@
-/**
- * Google Apps Script для експорту вкладки "Список" у CSV та завантаження на GitHub.
- * * НАЛАШТУВАННЯ:
- * Заповніть змінні у секції CONFIGURATION нижче перед запуском.
- */
-
-function onOpen() {
-  const ui = SpreadsheetApp.getUi();
-  ui.createMenu('GitHub Sync')
-      .addItem('Експортувати "Список" в GitHub', 'exportSheetToGitHub')
-      .addToUi();
-}
-
 function exportSheetToGitHub() {
-  // --- CONFIGURATION ---
-  const GITHUB_TOKEN = 'ВСТАВТЕ_ТУТ_ВАШ_ТОКЕН'; // Ваш Personal Access Token
-  const REPO_OWNER = 'viktorlevytskyi2022-tech';        // Власник репозиторію
-  const REPO_NAME = 'csad-task1';    // Назва репозиторію
-  const FILE_PATH = 'input/groups.csv';     // Шлях до файлу в репозиторії
-  const SHEET_NAME = 'Список';              // Назва вкладки для експорту
+  // --- НАЛАШТУВАННЯ ---
+  const GITHUB_TOKEN = 'ВСТАВТЕ_ТУТ_ВАШ_ТОКЕН'; // Вставте актуальний токен
+  const REPO_OWNER = 'viktorlevytskyiki2022-tech';
+  const REPO_NAME = 'csad-task1';
+  const FILE_PATH = 'input/groups.csv';
+  const SHEET_NAME = 'Список';
+  const BRANCH = 'main'; // Ваша гілка
   // ---------------------
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_NAME);
   
   if (!sheet) {
-    SpreadsheetApp.getUi().alert(`Помилка: Вкладку "${SHEET_NAME}" не знайдено.`);
+    Logger.log(`ПОМИЛКА: Вкладку "${SHEET_NAME}" не знайдено.`);
     return;
   }
 
-  // 1. Отримуємо дані та конвертуємо в CSV
+  Logger.log("Починаю конвертацію даних...");
   const data = sheet.getDataRange().getValues();
   const csvContent = convertToCSV(data);
-  
-  // 2. Кодуємо контент у Base64 (вимога GitHub API)
   const contentEncoded = Utilities.base64Encode(csvContent, Utilities.Charset.UTF_8);
   
-  // 3. Перевіряємо, чи файл вже існує (щоб отримати його SHA для оновлення)
+  Logger.log("Перевіряю, чи файл існує на GitHub...");
   const fileSha = getFileSha(REPO_OWNER, REPO_NAME, FILE_PATH, GITHUB_TOKEN);
   
-  // 4. Відправляємо запит на створення або оновлення файлу
   const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-  
   const payload = {
-    message: `Update ${FILE_PATH} from Google Sheets via Apps Script`,
+    message: `Update ${FILE_PATH} via Apps Script`,
     content: contentEncoded,
-    branch: 'master' // Або 'master', залежно від вашої гілки
+    branch: BRANCH
   };
 
   if (fileSha) {
-    payload.sha = fileSha; // Якщо файл існує, додаємо SHA для оновлення
+    payload.sha = fileSha;
+    Logger.log("Файл знайдено, будемо оновлювати.");
+  } else {
+    Logger.log("Файл не знайдено, створюємо новий.");
   }
 
   const options = {
@@ -61,43 +48,36 @@ function exportSheetToGitHub() {
     muteHttpExceptions: true
   };
 
+  Logger.log("Відправляю запит на GitHub...");
   const response = UrlFetchApp.fetch(url, options);
   const jsonResponse = JSON.parse(response.getContentText());
 
   if (response.getResponseCode() === 200 || response.getResponseCode() === 201) {
-    SpreadsheetApp.getUi().alert('Успіх! Файл успішно завантажено в GitHub.');
+    Logger.log("✅ УСПІХ! Файл завантажено.");
   } else {
-    SpreadsheetApp.getUi().alert('Помилка: ' + jsonResponse.message);
-    Logger.log(jsonResponse);
+    Logger.log("❌ ПОМИЛКА: " + jsonResponse.message);
+    Logger.log("Деталі: " + JSON.stringify(jsonResponse));
   }
 }
 
-// Допоміжна функція для отримання SHA існуючого файлу
 function getFileSha(owner, repo, path, token) {
-  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=master`;
   const options = {
     method: 'get',
-    headers: {
-      'Authorization': 'token ' + token,
-      'Accept': 'application/vnd.github.v3+json'
-    },
+    headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' },
     muteHttpExceptions: true
   };
-  
   const response = UrlFetchApp.fetch(url, options);
   if (response.getResponseCode() === 200) {
-    const data = JSON.parse(response.getContentText());
-    return data.sha;
+    return JSON.parse(response.getContentText()).sha;
   }
   return null;
 }
 
-// Допоміжна функція для конвертації масиву в CSV
 function convertToCSV(data) {
   return data.map(row => 
     row.map(cell => {
       let stringCell = String(cell);
-      // Екранування лапок та ком, якщо вони є в клітинці
       if (stringCell.includes(",") || stringCell.includes("\n") || stringCell.includes('"')) {
         stringCell = '"' + stringCell.replace(/"/g, '""') + '"';
       }
