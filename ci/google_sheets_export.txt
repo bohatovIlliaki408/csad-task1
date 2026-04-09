@@ -1,7 +1,7 @@
 function exportSheetToGitHub() {
   // --- НАЛАШТУВАННЯ ---
-  const GITHUB_TOKEN = 'ВСТАВТЕ_ТУТ_ВАШ_ТОКЕН'; // Вставте актуальний токен
-  const REPO_OWNER = 'viktorlevytskyiki2022-tech';
+  const GITHUB_TOKEN = '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'; // Вставте актуальний токен
+  const REPO_OWNER = 'bohatovIlliaki408';
   const REPO_NAME = 'csad-task1';
   const FILE_PATH = 'input/groups.csv';
   const SHEET_NAME = 'Список';
