@@ -20,8 +20,10 @@
 ## 🛠 Налаштування
 
 ### 1. У Google Таблиці (Apps Script)
-У редактор скриптів (`Extensions` -> `Apps Script`) вставлено код, який з'єднується з GitHub API.
-**Важливо коректно налаштувати секцію `CONFIG` у скрипті**
+Зробіть копію таблиці вашої групи.
+У редактор скриптів (`Extensions` -> `Apps Script`) вставити код з https://github.com/andrii-s-spitzer-lpnu-ua/csad-task1/blob/main/ci/google_sheets_export.txt, який з'єднується з GitHub API.
+**Важливо коректно налаштувати секцію `CONFIG` у скрипті https://github.com/andrii-s-spitzer-lpnu-ua/csad-task1/blob/main/ci/google_sheets_export.txt**
+Перезавантажте табличку, якщо все добре, то в табличці в меню появиться пункт CSAD Tools
 
 ### 2. У цьому репозиторії
 Структура файлів:
