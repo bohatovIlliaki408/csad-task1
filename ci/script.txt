@@ -1,7 +1,7 @@
 const CONFIG = {
-  githubToken: '', // <--- ВСТАВ ТОКЕН
-  repoOwner: 'viktorlevytskyiki2022', 
-  repoName: 'csad-check-new',   // <--- НАЗВУ РЕПО СЮДА          
+  githubToken: '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', // <--- ВСТАВ ТОКЕН
+  repoOwner: 'bohatovIlliaki408', 
+  repoName: 'csad-task1',   // <--- НАЗВУ РЕПО СЮДА          
   inputPath: 'input/groups.csv',
   outputPath: 'output/groups.csv',
   sheetName: 'Список',
